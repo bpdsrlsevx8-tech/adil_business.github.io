@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Открываем 2ГИС</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --muted: #5f6368;
+    --accent: #1da53a;
+    --accent-text: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #181a1b;
+      --text: #f1f1f1;
+      --muted: #a0a4a8;
+      --accent: #2bbd4a;
+      --accent-text: #0d1f12;
+    }
+  }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    text-align: center;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  main { width: 100%; max-width: 420px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin: 0 0 12px; }
+  p { color: var(--muted); font-size: 1.2rem; line-height: 1.5; margin: 0 0 32px; }
+  a.open {
+    display: block;
+    padding: 44px 24px;
+    border-radius: 24px;
+    background: var(--accent);
+    color: var(--accent-text);
+    font-size: 1.9rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  a.open:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+  a.web { display: inline-block; margin-top: 28px; color: var(--muted); font-size: 1.05rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Открываем 2ГИС</h1>
+  <p id="hint">Если приложение не открылось само, нажмите кнопку.</p>
+  <a class="open" id="open" href="#">Открыть в 2ГИС</a>
+  <a class="web" id="web" href="#">Открыть на сайте</a>
+</main>
+
+<script>
+  // Настройки: поменяйте ID места и город при необходимости.
+  var PLACE_ID = "70000001118723244";
+  var WEB_URL  = "https://2gis.kz/uralsk/geo/" + PLACE_ID;
+  var APP_URL  = "dgis://2gis.kz/geo/" + PLACE_ID;
+
+  var isAndroid = /Android/i.test(navigator.userAgent || "");
+  var openBtn = document.getElementById("open");
+  document.getElementById("web").setAttribute("href", WEB_URL);
+
+  if (isAndroid) {
+    // Android: открываем приложение напрямую по его ссылке dgis://.
+    openBtn.setAttribute("href", APP_URL);
+
+    // Если приложение открылось, страница уходит в фон, и сайт открывать не нужно.
+    var left = false;
+    function markLeft() { left = true; }
+    document.addEventListener("visibilitychange", function () { if (document.hidden) markLeft(); });
+    window.addEventListener("pagehide", markLeft);
+
+    setTimeout(function () { window.location.href = APP_URL; }, 100);
+
+    // Автозапуск мог быть заблокирован телефоном. Тогда нажатие на кнопку
+    // (оно считается действием пользователя) откроет приложение.
+    setTimeout(function () {
+      if (!left && !document.hidden) {
+        document.getElementById("hint").textContent =
+          "Нажмите большую кнопку. Если приложения нет, откройте сайт.";
+      }
+    }, 3000);
+  } else {
+    // iPhone и остальные: обычная ссылка, iOS сама откроет приложение, если оно есть.
+    openBtn.setAttribute("href", WEB_URL);
+    setTimeout(function () { window.location.href = WEB_URL; }, 150);
+  }
+</script>
+
+<noscript>
+  <p><a href="https://2gis.kz/uralsk/geo/70000001118723244">Открыть в 2ГИС</a></p>
+</noscript>
+</body>
+</html>
